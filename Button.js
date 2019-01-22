@@ -1,7 +1,7 @@
 // @flow
 import React from "react";
 import { Animated, TouchableWithoutFeedback } from "react-native";
-import { Image, View, Text } from "react-native";
+import { Image, View, Text, StyleSheet } from "react-native";
 
 type Props = {
   onPress?: () => void,
@@ -46,7 +46,6 @@ export default class Button extends React.Component<Props, State> {
     <Animated.View
       style={{
         flex: 1,
-
         padding: 10,
         transform: [
           {
@@ -63,47 +62,39 @@ export default class Button extends React.Component<Props, State> {
         onPressOut={this.onPressOut}
         onPress={this.onPress}
       >
-        <View
-          style={{
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-
-            elevation: 5,
-            backgroundColor: "white",
-            flex: 1,
-            borderRadius: 20,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20
-          }}
-        >
+        <View style={styles.imageContainer}>
           {this.props.tic && (
-            <Image
-              resizeMode="contain"
-              source={cross}
-              style={{
-                width: "100%",
-                height: "100%"
-              }}
-            />
+            <Image resizeMode="contain" source={cross} style={styles.image} />
           )}
           {this.props.tac && (
-            <Image
-              resizeMode="contain"
-              source={ou}
-              style={{
-                width: "100%",
-                height: "100%"
-              }}
-            />
+            <Image resizeMode="contain" source={ou} style={styles.image} />
           )}
         </View>
       </TouchableWithoutFeedback>
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  imageContainer: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
+    backgroundColor: "white",
+    flex: 1,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20
+  },
+  image: {
+    width: "100%",
+    height: "100%"
+  }
+});

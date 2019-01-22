@@ -32,18 +32,24 @@ const initialState = [
 ];
 
 type Props = {};
-export default class App extends React.Component<Props> {
+type State = {
+  battleField: Array<Array<EMPTY | TIC | TAC>>,
+  currentPlayer: TIC | TAC
+};
+export default class App extends React.Component<Props, State> {
   state = {
-    battleField: initialState,
+    battleField: [...initialState],
     currentPlayer: TIC
   };
 
-  setMark = (row, column, mark) => {
+  setMark = (row: number, column: numeber, mark: TIC | TAC) => {
     if (this.state.battleField[row][column] !== EMPTY) {
       Alert.alert("meh..");
       return;
     }
+
     this.state.battleField[row][column] = mark;
+
     this.setState({
       currentPlayer: this.state.currentPlayer === TIC ? TAC : TIC
     });
@@ -53,7 +59,19 @@ export default class App extends React.Component<Props> {
 
   checkWinner = () => {
     const { battleField } = this.state;
+    const ifEnded = () => {
+      for (let i = 0; i < 3; ++i) {
+        for (let j = 0; j < 3; ++j) {
+          if (battleField[i][j] === EMPTY) {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
     const checkFor = player => {
+      // let's make this stupid
       for (let i = 0; i < 3; ++i) {
         if (
           player === battleField[i][0] &&
@@ -73,30 +91,69 @@ export default class App extends React.Component<Props> {
         }
       }
 
+      if (
+        player === battleField[0][0] &&
+        player === battleField[1][1] &&
+        player === battleField[2][2]
+      ) {
+        return true;
+      }
+
+      if (
+        player === battleField[0][2] &&
+        player === battleField[1][1] &&
+        player === battleField[2][0]
+      ) {
+        return true;
+      }
+
       return false;
     };
 
+    // OMG, so much duplicated code
     if (checkFor(TIC)) {
-      Alert.alert("TIC WON");
+      Alert.alert(
+        "X WON",
+        "Congrats, yo!",
+        [{ text: "Reset Game", onPress: this.resetGame }],
+        { cancelable: false }
+      );
     }
 
     if (checkFor(TAC)) {
-      Alert.alert("TAC WON");
+      Alert.alert(
+        "O WON",
+        "Congrats, yo!",
+        [{ text: "Reset Game", onPress: this.resetGame }],
+        { cancelable: false }
+      );
     }
+
+    if (ifEnded()) {
+      Alert.alert(
+        "Oh no..",
+        "The game is over",
+        [{ text: "Reset Game", onPress: this.resetGame }],
+        { cancelable: false }
+      );
+    }
+  };
+
+  resetGame = () => {
+    this.setState({
+      battleField: [
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY]
+      ],
+      currentPlayer: TIC
+    });
   };
 
   render = () => (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text
-          style={{
-            fontFamily: "Rubik",
-            fontSize: 24,
-            fontWeight: "bold"
-          }}
-        >
-          TIC ... TAC
-        </Text>
+        <Text style={styles.title}>TIC ... TAC</Text>
       </View>
       <View style={styles.body}>
         {[0, 1, 2].map(column => (
@@ -115,26 +172,11 @@ export default class App extends React.Component<Props> {
         ))}
       </View>
       <View style={styles.footer}>
-        {this.state.currentPlayer === TIC && (
-          <Image
-            resizeMode="contain"
-            source={cross}
-            style={{
-              width: 80,
-              height: 80
-            }}
-          />
-        )}
-        {this.state.currentPlayer === TAC && (
-          <Image
-            resizeMode="contain"
-            source={ou}
-            style={{
-              width: 80,
-              height: 80
-            }}
-          />
-        )}
+        <Image
+          resizeMode="contain"
+          source={this.state.currentPlayer === TIC ? cross : ou}
+          style={styles.footerImage}
+        />
         <Text
           style={{
             fontFamily: "Rubik",
@@ -174,9 +216,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
+  title: {
+    fontFamily: "Rubik",
+    fontSize: 24,
+    fontWeight: "bold"
+  },
   footer: {
     flex: 2,
     alignItems: "center",
     justifyContent: "center"
+  },
+  footerImage: {
+    width: 80,
+    height: 80
   }
 });
