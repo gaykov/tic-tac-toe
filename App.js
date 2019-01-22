@@ -192,6 +192,18 @@ export default class App extends React.Component<Props, State> {
   );
 }
 
+const isIphoneX = () => {
+  const dimen = Dimensions.get("window");
+  return (
+    Platform.OS === "ios" &&
+    !Platform.isPad &&
+    !Platform.isTVOS &&
+    (dimen.height === 812 ||
+      dimen.width === 812 ||
+      (dimen.height === 896 || dimen.width === 896))
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -203,16 +215,15 @@ const styles = StyleSheet.create({
   body: {
     flex: 2,
     alignSelf: "stretch",
-    flexDirection: "column",
-    maxHeight: Dimensions.get("window").height / 2
+    flexDirection: "column"
   },
   row: {
     flex: 1,
     flexDirection: "row"
   },
   header: {
-    paddingTop: 80,
-    paddingBottom: 50,
+    paddingTop: isIphoneX() ? 80 : 40,
+    paddingBottom: isIphoneX() ? 40 : 20,
     alignItems: "center",
     justifyContent: "center"
   },
