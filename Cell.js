@@ -53,6 +53,15 @@ export default class Cell extends React.Component<Props, State> {
         this.state.visible = true;
       });
     }
+
+    if (this.state.visible && !(props.tic || props.tac)) {
+      Animated.timing(this.state.appearingAnimation, {
+        toValue: 0,
+        duration: 150
+      }).start(() => {
+        this.state.visible = false;
+      });
+    }
   };
 
   render = () => (
