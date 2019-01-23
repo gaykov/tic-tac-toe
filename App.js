@@ -14,9 +14,10 @@ import {
   View,
   Dimensions,
   Alert,
-  Image
+  Image,
+  Animated
 } from "react-native";
-import Button from "./Button";
+import Cell from "./Cell";
 
 const cross = require("./assets/images/cross.png");
 const ou = require("./assets/images/ou.png");
@@ -39,22 +40,39 @@ type State = {
 export default class App extends React.Component<Props, State> {
   state = {
     battleField: [...initialState],
-    currentPlayer: TIC
+    currentPlayer: TIC,
+    currentPlayerAnimation: new Animated.Value(1)
   };
 
   setMark = (row: number, column: numeber, mark: TIC | TAC) => {
+    // If the user clicks on the cell that already taken
     if (this.state.battleField[row][column] !== EMPTY) {
       Alert.alert("meh..");
       return;
     }
 
+    // Marking the clicked cell
     this.state.battleField[row][column] = mark;
+    this.setState({});
 
-    this.setState({
-      currentPlayer: this.state.currentPlayer === TIC ? TAC : TIC
-    });
-
-    this.checkWinner();
+    if (!this.checkWinner()) {
+      Animated.timing(this.state.currentPlayerAnimation, {
+        toValue: 0,
+        duration: 150
+      }).start(() => {
+        this.setState(
+          {
+            currentPlayer: this.state.currentPlayer === TIC ? TAC : TIC
+          },
+          () => {
+            Animated.timing(this.state.currentPlayerAnimation, {
+              toValue: 1,
+              duration: 150
+            }).start();
+          }
+        );
+      });
+    }
   };
 
   checkWinner = () => {
@@ -110,7 +128,7 @@ export default class App extends React.Component<Props, State> {
       return false;
     };
 
-    // OMG, so much duplicated code
+    // OMG, so much duplicated code, but who cares
     if (checkFor(TIC)) {
       Alert.alert(
         "X WON",
@@ -118,6 +136,7 @@ export default class App extends React.Component<Props, State> {
         [{ text: "Reset Game", onPress: this.resetGame }],
         { cancelable: false }
       );
+      return true;
     }
 
     if (checkFor(TAC)) {
@@ -127,6 +146,7 @@ export default class App extends React.Component<Props, State> {
         [{ text: "Reset Game", onPress: this.resetGame }],
         { cancelable: false }
       );
+      return true;
     }
 
     if (ifEnded()) {
@@ -136,6 +156,7 @@ export default class App extends React.Component<Props, State> {
         [{ text: "Reset Game", onPress: this.resetGame }],
         { cancelable: false }
       );
+      return true;
     }
   };
 
@@ -159,7 +180,7 @@ export default class App extends React.Component<Props, State> {
         {[0, 1, 2].map(column => (
           <View key={`row-${column}`} style={styles.row}>
             {[0, 1, 2].map(row => (
-              <Button
+              <Cell
                 key={`item-${column}-${row}`}
                 tic={this.state.battleField[row][column] === TIC}
                 tac={this.state.battleField[row][column] === TAC}
@@ -172,21 +193,15 @@ export default class App extends React.Component<Props, State> {
         ))}
       </View>
       <View style={styles.footer}>
-        <Image
+        <Animated.Image
           resizeMode="contain"
           source={this.state.currentPlayer === TIC ? cross : ou}
-          style={styles.footerImage}
-        />
-        <Text
           style={{
-            fontFamily: "Rubik",
-            fontSize: 18,
-            fontWeight: "300",
-            marginTop: 20
+            ...styles.footerImage,
+            opacity: this.state.currentPlayerAnimation
           }}
-        >
-          Now Playing
-        </Text>
+        />
+        <Text style={styles.footerText}>Now Playing</Text>
       </View>
     </View>
   );
@@ -240,5 +255,11 @@ const styles = StyleSheet.create({
   footerImage: {
     width: 80,
     height: 80
+  },
+  footerText: {
+    fontFamily: "Rubik",
+    fontSize: 18,
+    fontWeight: "300",
+    marginTop: 20
   }
 });

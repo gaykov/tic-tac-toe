@@ -16,9 +16,11 @@ type State = {
 const cross = require("./assets/images/cross.png");
 const ou = require("./assets/images/ou.png");
 
-export default class Button extends React.Component<Props, State> {
+export default class Cell extends React.Component<Props, State> {
   state = {
-    pressAnimation: new Animated.Value(0)
+    pressAnimation: new Animated.Value(0),
+    appearingAnimation: new Animated.Value(0),
+    visible: false
   };
 
   onPressIn = () => {
@@ -40,6 +42,17 @@ export default class Button extends React.Component<Props, State> {
   onPress = () => {
     if (this.props.disabled || !this.props.onPress) return;
     this.props.onPress();
+  };
+
+  componentWillUpdate = (props, state) => {
+    if ((props.tic || props.tac) && !this.state.visible) {
+      Animated.timing(this.state.appearingAnimation, {
+        toValue: 1,
+        duration: 150
+      }).start(() => {
+        this.state.visible = true;
+      });
+    }
   };
 
   render = () => (
@@ -64,10 +77,38 @@ export default class Button extends React.Component<Props, State> {
       >
         <View style={styles.imageContainer}>
           {this.props.tic && (
-            <Image resizeMode="contain" source={cross} style={styles.image} />
+            <Animated.Image
+              resizeMode="contain"
+              source={cross}
+              style={{
+                ...styles.image,
+                transform: [
+                  {
+                    scale: this.state.appearingAnimation.interpolate({
+                      inputRange: [0, 0.8, 1],
+                      outputRange: [0, 1.2, 1]
+                    })
+                  }
+                ]
+              }}
+            />
           )}
           {this.props.tac && (
-            <Image resizeMode="contain" source={ou} style={styles.image} />
+            <Animated.Image
+              resizeMode="contain"
+              source={ou}
+              style={{
+                ...styles.image,
+                transform: [
+                  {
+                    scale: this.state.appearingAnimation.interpolate({
+                      inputRange: [0, 0.8, 1],
+                      outputRange: [0, 1.2, 1]
+                    })
+                  }
+                ]
+              }}
+            />
           )}
         </View>
       </TouchableWithoutFeedback>
